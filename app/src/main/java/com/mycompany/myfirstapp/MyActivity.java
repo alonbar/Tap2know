@@ -15,7 +15,10 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.List;
 
+
+import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 
 public class MyActivity extends AppCompatActivity  {
     public final static String EXTRA_MESSAGE = "com.mycompany.myfirstapp.MESSAGE";
@@ -39,12 +42,19 @@ public class MyActivity extends AppCompatActivity  {
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
-
-
         try {
+            int timeToWaitForScheduleInSechonds = 30;
             Context [] arr = new Context[1];
             arr[0] = getApplicationContext();
-            new FetchSpreadSheet().execute(arr);
+            FetchSpreadSheet fetcher = new FetchSpreadSheet();
+            long startTime = System.currentTimeMillis();
+            fetcher.execute(arr);
+            while (fetcher.currentSchedule == null && System.currentTimeMillis() - startTime < timeToWaitForScheduleInSechonds * 1000);
+            SpreadsheetEntry schedule = fetcher.currentSchedule;
+            SpreadsheetEntry [] schedules  = new SpreadsheetEntry[1];
+            schedules[0] = schedule;
+            Processor processTasks = new Processor();
+            processTasks.execute(schedules);
 
         } catch (Exception e) {
             e.printStackTrace();

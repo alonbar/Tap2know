@@ -3,17 +3,14 @@ package com.mycompany.myfirstapp;
 /**
  * Created by baralon on 18/12/2015.
  */
-//import com.google.gdata.client.spreadsheet.*;
-//import com.google.gdata.data.spreadsheet.*;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
-import com.google.api.services.drive.Drive;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
-import com.google.gdata.util.*;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -29,7 +26,7 @@ import java.net.*;
 import java.util.*;
 
 public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
-
+    public SpreadsheetEntry currentSchedule ;
     protected Long doInBackground(Context... contexts) {
         String applicationName = "AppName";
         String user = "alonlpc";
@@ -53,7 +50,6 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
                     .setServiceAccountPrivateKeyFromP12File(p12)
                     .build();
 
-//            credential.refreshToken();
             SpreadsheetService service = new SpreadsheetService("test03");
 
             service.setOAuth2Credentials(credential);
@@ -66,10 +62,11 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
 
             SpreadsheetEntry spreadsheet = null;
             for (int i = 0; i < spreadsheets.size(); i++) {
-                if (spreadsheets.get(i).getTitle().getPlainText().startsWith("test03")) {
+                if (spreadsheets.get(i).getTitle().getPlainText().startsWith("TimeTable")) {
                     spreadsheet = spreadsheets.get(i);
-                    System.out.println("Name of editing spreadsheet: " + spreadsheets.get(i).getTitle().getPlainText());
-                    System.out.println("ID of SpreadSheet: " + i);
+                    Log.i("Name : ", spreadsheets.get(i).getTitle().getPlainText());
+                    currentSchedule = spreadsheet;
+                    return 0L;
                 }
             }
 
