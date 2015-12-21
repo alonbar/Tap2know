@@ -9,8 +9,11 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.spreadsheet.CellEntry;
+import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
+import com.google.gdata.data.spreadsheet.WorksheetEntry;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -27,6 +30,7 @@ import java.util.*;
 
 public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
     public SpreadsheetEntry currentSchedule ;
+    public static String userName;
     protected Long doInBackground(Context... contexts) {
         String applicationName = "AppName";
         String user = "alonlpc";
@@ -66,8 +70,29 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
                     spreadsheet = spreadsheets.get(i);
                     Log.i("Name : ", spreadsheets.get(i).getTitle().getPlainText());
                     currentSchedule = spreadsheet;
-                    return 0L;
+                    break;
                 }
+            }
+            if (spreadsheet == null)
+                return null;
+            List<WorksheetEntry> worksheets = currentSchedule.getWorksheets();
+            WorksheetEntry userSchedule = null;
+            for (WorksheetEntry worksheet : worksheets) {
+                //find worksheet for user.
+                String title = worksheet.getTitle().getPlainText();
+                if (userName.equals(title)) {
+                    Log.i("working on user: ", title);
+                    userSchedule = worksheet;
+                    break;
+                }
+                URL cellFeedUrl = new URI(userSchedule.getCellFeedUrl().toString()
+                        + "?min-row=2&max-row=2&min-col=2&max-col=2").toURL();
+                CellFeed cellFeed = service.getFeed(cellFeedUrl, CellFeed.class);
+                for (CellEntry cell : cellFeed.getEntries()) {
+                    //  get cell value
+                   Log.i("cell value: ", cell.getCell().getInputValue());
+                }
+
             }
 
         } catch (Exception e)
