@@ -80,39 +80,40 @@ public class MyActivity extends AppCompatActivity {
         });
 
         Context context = getApplicationContext();
-        CharSequence text = "Hello toast!";
-        int duration = Toast.LENGTH_SHORT;
+        CharSequence text = "Please enter username";
+        int duration = Toast.LENGTH_LONG;
         Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-        try {
-            int timeToWaitForScheduleInSechonds = 30;
-            Context[] arr = new Context[1];
-            arr[0] = getApplicationContext();
-            FetchSpreadSheet fetcher = new FetchSpreadSheet();
-            long startTime = System.currentTimeMillis();
-            fetcher.execute(arr);
+        String fileName = "userName";
+        File file = new File(context.getFilesDir(), fileName);
+        FileOutputStream outputStream;
+        if (!file.exists()) {
+            toast.show();
+        } 
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            try {
+                int timeToWaitForScheduleInSechonds = 30;
+                Context[] arr = new Context[1];
+                arr[0] = getApplicationContext();
+                FetchSpreadSheet fetcher = new FetchSpreadSheet();
+                long startTime = System.currentTimeMillis();
+                fetcher.execute(arr);
+                while (FetchSpreadSheet.taskToReturn.equals("") && (System.currentTimeMillis() - startTime) < timeToWaitForScheduleInSechonds * 1000) {
+                    Thread.sleep(2);
+                }
+                convertToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                    @Override
+                    public void onInit(int status) {
+                        if (status != TextToSpeech.ERROR) {
+                            convertToSpeech.setLanguage(Locale.US);
+                            convertToSpeech.speak(FetchSpreadSheet.taskToReturn, TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
+                    }
+                });
 
-//        textToSpeech.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                final String convertTextToSpeech = "שלום";
-//                convertToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-//                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-//                    @Override
-//                    public void onInit(int status) {
-//                        if (status != TextToSpeech.ERROR) {
-//                            convertToSpeech.setLanguage(Locale.US);
-//                            convertToSpeech.speak(convertTextToSpeech, TextToSpeech.QUEUE_FLUSH, null, null);
-//                        }
-//                    }
-//                });
-//            }
-//        });
-
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -145,13 +146,25 @@ public class MyActivity extends AppCompatActivity {
      * Called when the user clicks the Send button
      */
     public void sendMessage(View view) {
+
+        Intent intent = new Intent(this, DisplayMessageActivity.class);
+        String fileName = "userName";
+        Context context = getApplicationContext();
+        File file = new File(context.getFilesDir(), fileName);
+        FileOutputStream outputStream;
+        if (!file.exists()) {
+            intent.putExtra(EXTRA_MESSAGE, "not exist");
+        } else {
+            intent.putExtra(EXTRA_MESSAGE, "exist");
+        }
+        startActivity(intent);
 //        Intent intent = new Intent(this, DisplayMessageActivity.class);
 //        EditText editText = (EditText) findViewById(R.id.edit_message);
 //        String message = editText.getText().toString();
 //        intent.putExtra(EXTRA_MESSAGE, message);
 //        startActivity(intent);
 
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
+//        Intent intent = new Intent(this, DisplayMessageActivity.class);
         EditText editText = (EditText) findViewById(R.id.edit_message);
         String message = editText.getText().toString();
         intent.putExtra(EXTRA_MESSAGE, message);

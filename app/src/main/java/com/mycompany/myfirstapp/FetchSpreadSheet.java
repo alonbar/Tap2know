@@ -26,22 +26,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
     public SpreadsheetEntry currentSchedule ;
-    public static String userName;
-    final String SUNDAY = "B";
-    final String MONDAY = "C";
-    final String TUESDAY = "D";
-    final String WEDENSDAY = "E";
-
+    public static String userName = "alon";
+    static final String serviceAccountID = "alon-140@timeme-1164.iam.gserviceaccount.com";
+    static String taskToReturn = "";
     protected Long doInBackground(Context... contexts) {
-        String applicationName = "AppName";
-        String user = "alonlpc";
-        String pass = "rfvtgB!11";
         Context context = contexts[0].getApplicationContext();
         URL SPREADSHEET_FEED_URL;
         try {
@@ -56,7 +48,7 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
             GoogleCredential credential = new GoogleCredential.Builder()
                     .setTransport(httpTransport)
                     .setJsonFactory(jsonFactory)
-                    .setServiceAccountId("alon-140@timeme-1164.iam.gserviceaccount.com")
+                    .setServiceAccountId(serviceAccountID)
                     .setServiceAccountScopes(SCOPES)
                     .setServiceAccountPrivateKeyFromP12File(p12)
                     .build();
@@ -70,7 +62,6 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
             if (spreadsheets.size() == 0) {
                 Log.i("No spreadsheets", " found.");
             }
-
             SpreadsheetEntry spreadsheet = null;
             for (int i = 0; i < spreadsheets.size(); i++) {
                 if (spreadsheets.get(i).getTitle().getPlainText().startsWith("TimeTable")) {
@@ -82,31 +73,47 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
             }
             if (spreadsheet == null)
                 return null;
-            userName="alon";
             List<WorksheetEntry> worksheets = currentSchedule.getWorksheets();
             WorksheetEntry userSchedule = null;
             for (WorksheetEntry worksheet : worksheets) {
                 //find worksheet for user.
                 String title = worksheet.getTitle().getPlainText();
-
                 if (userName.equals(title)) {
                     Log.i("working on user: ", title);
                     userSchedule = worksheet;
                     break;
                 }
-                Calendar calendar = Calendar.getInstance();
-                int day = calendar.get(Calendar.DAY_OF_WEEK);
-                int f = Calendar.HOUR_OF_DAY;
+            }
+            if (userSchedule == null) {
+                return 0L;
+            }
 
-                URL cellFeedUrl = new URI(userSchedule.getCellFeedUrl().toString()
-                        + "?min-row=2&max-row=2&min-col=2&max-col=2").toURL();
-                CellFeed cellFeed = service.getFeed(cellFeedUrl, CellFeed.class);
-                for (CellEntry cell : cellFeed.getEntries()) {
-                    //  get cell value
-                   Log.i("cell value: ", cell.getCell().getInputValue());
+            int NUMBER_OF_HOURS_TO_SERACH = 5;
+            Calendar calendar = Calendar.getInstance();
+            int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+            int day = calendar.get(Calendar.DAY_OF_WEEK);
+            int queryHour = hourOfDay;
+            int queryDay = day;
+            for (int i = 0; i < NUMBER_OF_HOURS_TO_SERACH; i++) {
+                queryHour = (hourOfDay + i) % 24;
+                if (hourOfDay + i == 24) {
+                    queryDay += 1;
+                    if (queryDay > Calendar.SATURDAY) {
+                        queryDay = Calendar.SUNDAY;
+                    }
                 }
 
+                String searchQuery = queryBuilder(queryHour, queryDay);
+                URL cellFeedUrl = new URI(userSchedule.getCellFeedUrl().toString() + searchQuery).toURL();
+                CellFeed cellFeed = service.getFeed(cellFeedUrl, CellFeed.class);
+                int numberOfCells = cellFeed.getEntries().size();
+                if (cellFeed.getEntries().size() ==0) {
+                    continue;
+                }
+                taskToReturn = cellFeed.getEntries().get(0).getCell().getInputValue();
+                break;
             }
+            Log.i("task to return: ", taskToReturn);
 
         } catch (Exception e)
         {
@@ -117,10 +124,19 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
         return 0L;
     }
 
+    private String queryBuilder (int hour, int day) {
+        final String PREFIX = "?";
+        final String AND = "&";
+        final String MIM_ROW = "min-row=";
+        final String MAX_ROW = "max-row=";
+        final String MIN_COL = "min-col=";
+        final String MAX_COL = "max-col=";
+        String query = PREFIX + MIM_ROW + String.valueOf(hour + 2) + AND + MAX_ROW + String.valueOf(hour+2) + AND + MIN_COL + String.valueOf(day + 1) + AND + MAX_COL + String.valueOf(day + 1);
+        return query;
+    }
+
     public static File createFileFromInputStream(InputStream inputStream) {
-
         String path = "";
-
         File file = new File(Environment.getExternalStorageDirectory(),
                 "KeyHolder/KeyFile/");
         if (!file.exists()) {
