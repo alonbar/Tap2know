@@ -26,11 +26,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
     public SpreadsheetEntry currentSchedule ;
     public static String userName;
+    final String SUNDAY = "B";
+    final String MONDAY = "C";
+    final String TUESDAY = "D";
+    final String WEDENSDAY = "E";
+
     protected Long doInBackground(Context... contexts) {
         String applicationName = "AppName";
         String user = "alonlpc";
@@ -61,7 +68,7 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
             List<SpreadsheetEntry> spreadsheets = feed.getEntries();
 
             if (spreadsheets.size() == 0) {
-                System.out.println("No spreadsheets found.");
+                Log.i("No spreadsheets", " found.");
             }
 
             SpreadsheetEntry spreadsheet = null;
@@ -75,16 +82,22 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
             }
             if (spreadsheet == null)
                 return null;
+            userName="alon";
             List<WorksheetEntry> worksheets = currentSchedule.getWorksheets();
             WorksheetEntry userSchedule = null;
             for (WorksheetEntry worksheet : worksheets) {
                 //find worksheet for user.
                 String title = worksheet.getTitle().getPlainText();
+
                 if (userName.equals(title)) {
                     Log.i("working on user: ", title);
                     userSchedule = worksheet;
                     break;
                 }
+                Calendar calendar = Calendar.getInstance();
+                int day = calendar.get(Calendar.DAY_OF_WEEK);
+                int f = Calendar.HOUR_OF_DAY;
+
                 URL cellFeedUrl = new URI(userSchedule.getCellFeedUrl().toString()
                         + "?min-row=2&max-row=2&min-col=2&max-col=2").toURL();
                 CellFeed cellFeed = service.getFeed(cellFeedUrl, CellFeed.class);

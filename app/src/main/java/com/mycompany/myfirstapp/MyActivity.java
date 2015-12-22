@@ -96,22 +96,22 @@ public class MyActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        textToSpeech.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String convertTextToSpeech = "שלום";
-                convertToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                    @Override
-                    public void onInit(int status) {
-                        if (status != TextToSpeech.ERROR) {
-                            convertToSpeech.setLanguage(Locale.US);
-                            convertToSpeech.speak(convertTextToSpeech, TextToSpeech.QUEUE_FLUSH, null, null);
-                        }
-                    }
-                });
-            }
-        });
+//        textToSpeech.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                final String convertTextToSpeech = "שלום";
+//                convertToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+//                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+//                    @Override
+//                    public void onInit(int status) {
+//                        if (status != TextToSpeech.ERROR) {
+//                            convertToSpeech.setLanguage(Locale.US);
+//                            convertToSpeech.speak(convertTextToSpeech, TextToSpeech.QUEUE_FLUSH, null, null);
+//                        }
+//                    }
+//                });
+//            }
+//        });
 
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
