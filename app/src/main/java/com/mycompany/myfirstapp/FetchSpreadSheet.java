@@ -30,7 +30,7 @@ import java.util.*;
 
 public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
     public SpreadsheetEntry currentSchedule ;
-    public static String userName = "alon";
+    public static String userName;
     static final String serviceAccountID = "alon-140@timeme-1164.iam.gserviceaccount.com";
     static String taskToReturn = "";
     protected Long doInBackground(Context... contexts) {
@@ -85,6 +85,7 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
                 }
             }
             if (userSchedule == null) {
+                taskToReturn="אין שם משתמש כזה בטבלאת המשימות";
                 return 0L;
             }
 
@@ -114,6 +115,9 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
                 break;
             }
             Log.i("task to return: ", taskToReturn);
+            if (taskToReturn.equals("")) {
+                taskToReturn = "אין מטלות בקרוב";
+            }
 
         } catch (Exception e)
         {

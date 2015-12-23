@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +17,10 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 
@@ -39,6 +43,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,6 +67,7 @@ public class MyActivity extends AppCompatActivity {
 
     private EditText userInputToSpeech;
     private TextToSpeech convertToSpeech;
+    String fileName = "userName";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -66,8 +78,6 @@ public class MyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
-        Button textToSpeech = (Button) findViewById(R.id.text_to_speech);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -85,17 +95,28 @@ public class MyActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(context, text, duration);
         String fileName = "userName";
         File file = new File(context.getFilesDir(), fileName);
-        FileOutputStream outputStream;
+
+        Reader reader;
         if (!file.exists()) {
             toast.show();
-        } 
-
+        }
+        else {
             try {
+                StringBuilder textFile = new StringBuilder();
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    textFile.append(line);
+                }
+                br.close();
+                FetchSpreadSheet.userName = textFile.toString();
+                Log.i("file content: ", textFile.toString());
                 int timeToWaitForScheduleInSechonds = 30;
                 Context[] arr = new Context[1];
                 arr[0] = getApplicationContext();
                 FetchSpreadSheet fetcher = new FetchSpreadSheet();
                 long startTime = System.currentTimeMillis();
+                fetcher.taskToReturn = "";
                 fetcher.execute(arr);
                 while (FetchSpreadSheet.taskToReturn.equals("") && (System.currentTimeMillis() - startTime) < timeToWaitForScheduleInSechonds * 1000) {
                     Thread.sleep(2);
@@ -114,6 +135,7 @@ public class MyActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -148,41 +170,47 @@ public class MyActivity extends AppCompatActivity {
     public void sendMessage(View view) {
 
         Intent intent = new Intent(this, DisplayMessageActivity.class);
-        String fileName = "userName";
+
+        EditText editText = (EditText) findViewById(R.id.edit_message);
+        String userName = editText.getText().toString();
+        Log.i("the user name is: ", userName);
         Context context = getApplicationContext();
         File file = new File(context.getFilesDir(), fileName);
         FileOutputStream outputStream;
-        if (!file.exists()) {
-            intent.putExtra(EXTRA_MESSAGE, "not exist");
-        } else {
-            intent.putExtra(EXTRA_MESSAGE, "exist");
+        Writer writer = null;
+
+        try {
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
+            outputStream.write(userName.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        startActivity(intent);
-//        Intent intent = new Intent(this, DisplayMessageActivity.class);
-//        EditText editText = (EditText) findViewById(R.id.edit_message);
-//        String message = editText.getText().toString();
-//        intent.putExtra(EXTRA_MESSAGE, message);
-//        startActivity(intent);
+        Toast toast = Toast.makeText(context, "New user was entered", Toast.LENGTH_LONG);
+        toast.show();
+    }
 
-//        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        EditText editText = (EditText) findViewById(R.id.edit_message);
-        String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, message);
-        startActivity(intent);
-//        Context context = getApplicationContext();
-//        String fileName = "userName";
-//        File file = new File(context.getFilesDir(), fileName);
-//        FileOutputStream outputStream;
-//        if (!file.exists()) {
-//            try {
-//                outputStream = openFileOutput(fileName.toString(), Context.MODE_PRIVATE);
-//                outputStream.write(message.getBytes());
-//                outputStream.close();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
 
+    /* Checks if external storage is available to at least read */
+    public boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
     }
 
     public void checkUser(View view) {
