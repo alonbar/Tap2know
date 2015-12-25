@@ -35,6 +35,7 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
     static String taskToReturn = "";
     static String THE_TIME_IS = "השעה היא ";
     static String AND_NEXT_TASK_IS = "והמשימה הבאה היא";
+    static String MINUTES = "דקות";
     protected Long doInBackground(Context... contexts) {
         Context context = contexts[0].getApplicationContext();
         URL SPREADSHEET_FEED_URL;
