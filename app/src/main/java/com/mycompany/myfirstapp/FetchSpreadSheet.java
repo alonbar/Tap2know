@@ -33,6 +33,8 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
     public static String userName;
     static final String serviceAccountID = "alon-140@timeme-1164.iam.gserviceaccount.com";
     static String taskToReturn = "";
+    static String THE_TIME_IS = "השעה היא ";
+    static String AND_NEXT_TASK_IS = "והמשימה הבאה היא";
     protected Long doInBackground(Context... contexts) {
         Context context = contexts[0].getApplicationContext();
         URL SPREADSHEET_FEED_URL;
@@ -92,6 +94,7 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
             int NUMBER_OF_HOURS_TO_SERACH = 5;
             Calendar calendar = Calendar.getInstance();
             int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+            int minuteOfDay = calendar.get(Calendar.MINUTE);
             int day = calendar.get(Calendar.DAY_OF_WEEK);
             int queryHour = hourOfDay;
             int queryDay = day;
@@ -111,12 +114,18 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
                 if (cellFeed.getEntries().size() ==0) {
                     continue;
                 }
-                taskToReturn = cellFeed.getEntries().get(0).getCell().getInputValue();
+                String tempStr = cellFeed.getEntries().get(0).getCell().getInputValue();
+                int hourOfDayIn12Hours = hourOfDay % 12;
+                if (hourOfDay == 0) {
+                    hourOfDay = 12;
+                }
+                String currentTime = String.valueOf(hourOfDayIn12Hours) + ":" + String.valueOf(minuteOfDay);
+                taskToReturn = THE_TIME_IS + " "+ currentTime + " " + AND_NEXT_TASK_IS + " " + tempStr;
                 break;
             }
             Log.i("task to return: ", taskToReturn);
             if (taskToReturn.equals("")) {
-                taskToReturn = "אין מטלות בקרוב";
+                taskToReturn = "ואין מטלות בקרוב";
             }
 
         } catch (Exception e)
