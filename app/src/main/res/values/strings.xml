@@ -9,6 +9,8 @@
     <string name="is_user_exist">Check User</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_tag">TagActivity</string>
+    <string name="alon">alon</string>
     <!--<string name="text_to_speech">Convert Text to Speech</string>-->
 
 </resources>
