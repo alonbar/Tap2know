@@ -127,7 +127,10 @@ public class MyActivity extends AppCompatActivity {
                     public void onInit(int status) {
                         if (status != TextToSpeech.ERROR) {
                             convertToSpeech.setLanguage(Locale.US);
-                            convertToSpeech.speak(FetchSpreadSheet.taskToReturn, TextToSpeech.QUEUE_FLUSH, null, null);
+                            int NUMBER_OF_READING_TIME = 1;
+                            for (int i = 0; i < NUMBER_OF_READING_TIME; i ++ ) {
+                                convertToSpeech.speak(FetchSpreadSheet.taskToReturn, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
                         }
                     }
                 });

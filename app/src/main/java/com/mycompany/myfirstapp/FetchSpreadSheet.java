@@ -117,8 +117,8 @@ public class FetchSpreadSheet extends AsyncTask<Context, Void, Long> {
                 }
                 String tempStr = cellFeed.getEntries().get(0).getCell().getInputValue();
                 int hourOfDayIn12Hours = hourOfDay % 12;
-                if (hourOfDay == 0) {
-                    hourOfDay = 12;
+                if (hourOfDayIn12Hours == 0) {
+                    hourOfDayIn12Hours = 12;
                 }
                 String currentTime = String.valueOf(hourOfDayIn12Hours) + ":" + String.valueOf(minuteOfDay);
                 taskToReturn = THE_TIME_IS + " "+ currentTime + " " + AND_NEXT_TASK_IS + " " + tempStr;
